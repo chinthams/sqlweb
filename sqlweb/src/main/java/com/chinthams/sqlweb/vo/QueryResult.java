@@ -3,19 +3,19 @@
  */
 package com.chinthams.sqlweb.vo;
 
-import java.sql.ResultSet;
 import java.util.List;
 
 /**
  * @author SRCHINTH
  *
  */
-public class QueryResult {
+public class QueryResult extends QueryRequest {
+	private int columnCount;
+	private List<Object[]> result;
+	private int resultCount;
+	private List<ColumnMetaData> resultMetaData;
 	private int statusCode;
 	private String statusDescription;
-	private int columnCount;
-	private List<ColumnMetaData> resultMetaData;
-	private ResultSet result;
 
 	/**
 	 * @return the columnCount
@@ -25,10 +25,17 @@ public class QueryResult {
 	}
 
 	/**
-	 * @param columnCount the columnCount to set
+	 * @return the result
 	 */
-	public void setColumnCount(int columnCount) {
-		this.columnCount = columnCount;
+	public List<Object[]> getResult() {
+		return result;
+	}
+
+	/**
+	 * @return the resultCount
+	 */
+	public int getResultCount() {
+		return resultCount;
 	}
 
 	/**
@@ -39,24 +46,10 @@ public class QueryResult {
 	}
 
 	/**
-	 * @param resultMetaData the resultMetaData to set
-	 */
-	public void setResultMetaData(List<ColumnMetaData> resultMetaData) {
-		this.resultMetaData = resultMetaData;
-	}
-
-	/**
 	 * @return the statusCode
 	 */
 	public int getStatusCode() {
 		return statusCode;
-	}
-
-	/**
-	 * @param statusCode the statusCode to set
-	 */
-	public void setStatusCode(int statusCode) {
-		this.statusCode = statusCode;
 	}
 
 	/**
@@ -67,24 +60,45 @@ public class QueryResult {
 	}
 
 	/**
-	 * @param statusDescription the statusDescription to set
+	 * @param columnCount the columnCount to set
 	 */
-	public void setStatusDescription(String statusDescription) {
-		this.statusDescription = statusDescription;
-	}
-
-	/**
-	 * @return the result
-	 */
-	public ResultSet getResult() {
-		return result;
+	public void setColumnCount(int columnCount) {
+		this.columnCount = columnCount;
 	}
 
 	/**
 	 * @param result the result to set
 	 */
-	public void setResult(ResultSet result) {
+	public void setResult(List<Object[]> result) {
 		this.result = result;
+	}
+
+	/**
+	 * @param resultCount the resultCount to set
+	 */
+	public void setResultCount(int resultCount) {
+		this.resultCount = resultCount;
+	}
+
+	/**
+	 * @param resultMetaData the resultMetaData to set
+	 */
+	public void setResultMetaData(List<ColumnMetaData> resultMetaData) {
+		this.resultMetaData = resultMetaData;
+	}
+
+	/**
+	 * @param statusCode the statusCode to set
+	 */
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * @param statusDescription the statusDescription to set
+	 */
+	public void setStatusDescription(String statusDescription) {
+		this.statusDescription = statusDescription;
 	}
 
 }

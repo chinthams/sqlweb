@@ -3,20 +3,23 @@
  */
 package com.chinthams.sqlweb;
 
-import java.text.MessageFormat;
-
 /**
  * @author SRCHINTH
  *
  */
 public interface Constants {
+	String BLANK = "";
 	String PREFIX_JDBC = "jdbc.";
-	String SPLIT = ".";
+	String SPLIT = "\\.";
 	String default_port = "0";
 	String server_port = "server.port";
-	MessageFormat MF_JDBC_DRIVER = new MessageFormat("jdbc.{0}.driverClassName");
-	MessageFormat MF_JDBC_URL = new MessageFormat("jdbc.{0}.url");
-	MessageFormat MF_JDBC_USER = new MessageFormat("jdbc.{0}.username");
-	MessageFormat MF_JDBC_PASSWORD = new MessageFormat("jdbc.{0}.password");
+
+	int STCODE_SUCCESS = 100;
+	String STDESC_SUCCESS = "Success";
+	int STCODE_INVALID_DATASOURCE = 101;
+	String STDESC_INVALID_DATASOURCE = "Invalid DataSource";
+	int STCODE_INVALID_QUERY = 102;
+	String STDESC_INVALID_QUERY = "Invalid Query String";
+	
 	
 }

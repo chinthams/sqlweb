@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -20,6 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application implements Constants {
 	private static Properties appProperties = new Properties();
 	private static Properties srvProperties = new Properties();
+	private static final Log logger = LogFactory.getLog(Application.class.getName());
 
 	static {
 		srvProperties.put(server_port, default_port);
@@ -49,11 +52,11 @@ public class Application implements Constants {
 								Integer.parseInt((String) appProperties.get(server_port));
 								srvProperties.put(server_port, appProperties.get(server_port));
 							} catch (NumberFormatException nfe) {
-								System.out.println("Invalid overriding port");
+								logger.info("Invalid overriding port");
 							}
 						}
 					} else {
-						System.out.println("File Not Found : " + iFile.getPath());
+						logger.info("File is either Not Found or Not Readable: " + iFile.getPath());
 					}
 				}
 			} catch (FileNotFoundException e) {
