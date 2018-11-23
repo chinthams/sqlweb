@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SQL Web</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
+	<script>
+		var app = angular.module('myApp', []);
+		app.controller('formCtrl', function($scope, $http) {
+			$scope.output_msg = null;
+			$scope.queryString = '';
+
+			var form_data = {
+				'dataSource': $scope.dataSource,
+				'queryString': $scope.queryString
+			}
+			var header_config = {
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
+			
+			
+			$http.get("dataSources")
+		    	.then(function(response) {
+		    		$scope.dsData = response.data; 
+		    });
+			$scope.getResult = function() {
+				if ($scope.dataSource == undefined || $scope.dataSource == '') {
+					return false;
+				}
+				if ($scope.queryString == undefined || $scope.queryString == '') {
+					return false;
+				}
+				alert(form_data);
+				$http({
+						method: 'POST',
+						url: 'query',
+						data: form_data,
+					 	config: header_config
+				}).then(
+					function(response) {
+						alert(response.data)
+						alert(response.data.statusDescription)
+						$scope.output_msg = response.data.statusDescription;
+					},
+					function(response) {
+						$scope.output_msg = "Service unavailable. Please try again.";
+					}
+				);
+				
+				
+			};
+		});
+	</script>
+</head>
+<body>
+	<div ng-app="myApp" ng-controller="formCtrl">
+		<h1>Welcome to SQL Web</h1>
+		<form name="formInput">
+			<fieldset>
+				<legend>Input</legend>
+				<table>
+					<tr>
+						<th align="right">Datasource:</th>
+						<td><select name="dataSource" ng-model="dataSource">
+							<option value="">Select</option>
+							<option ng-repeat="x in dsData">{{ x }}</option>
+							</select></td>
+					</tr>
+					<tr>
+						<th align="right">Query:</th>
+						<td><textarea name="queryString" cols="15" rows="4" ng-model="queryString">{{queryString}}</textarea></td>
+					</tr>
+					<tr>
+						<th>&nbsp;</th>
+						<td><button ng-click="getResult();">Execute</button></td>
+					</tr>
+				</table>
+			</fieldset>
+		</form>
+		<div name="result" id="result"></div>
+	</div>
+</body>
+</html>

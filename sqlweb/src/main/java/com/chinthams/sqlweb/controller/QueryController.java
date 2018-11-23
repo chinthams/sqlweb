@@ -44,12 +44,14 @@ public class QueryController implements Constants {
 	@Autowired
 	private Map<String, DataSource> dataSources;
 
+	/*
 	@GetMapping("/")
 	public String home() {
 		logger.info("Inside home method");
 		return "Welcome to SQLWEB";
 	}
-
+	*/
+	
 	@GetMapping("/dataSources")
 	public Set<String> getDataSources() {
 		logger.info("Inside getDataSources method");
@@ -64,6 +66,8 @@ public class QueryController implements Constants {
 		Statement st = null;
 		ResultSet rs = null;
 		try {
+			System.out.println(qRequest.getDataSource());
+			System.out.println(qRequest.getQueryString());
 			String dsName = qRequest.getDataSource() != null ? qRequest.getDataSource().trim() : BLANK;
 			String queryString = qRequest.getQueryString() != null ? qRequest.getQueryString().trim() : BLANK;
 			qResult.setDataSource(dsName);
