@@ -2,83 +2,196 @@
 <html>
 <head>
 	<title>SQL Web</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
-	<script>
-		var app = angular.module('myApp', []);
-		app.controller('formCtrl', function($scope, $http) {
-			$scope.output_msg = null;
-			$scope.queryString = '';
-
-			var form_data = {
-				'dataSource': $scope.dataSource,
-				'queryString': $scope.queryString
-			}
-			var header_config = {
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
-			
-			
-			$http.get("dataSources")
-		    	.then(function(response) {
-		    		$scope.dsData = response.data; 
-		    });
-			$scope.getResult = function() {
-				if ($scope.dataSource == undefined || $scope.dataSource == '') {
-					return false;
-				}
-				if ($scope.queryString == undefined || $scope.queryString == '') {
-					return false;
-				}
-				alert(form_data);
-				$http({
-						method: 'POST',
-						url: 'query',
-						data: form_data,
-					 	config: header_config
-				}).then(
-					function(response) {
-						alert(response.data)
-						alert(response.data.statusDescription)
-						$scope.output_msg = response.data.statusDescription;
-					},
-					function(response) {
-						$scope.output_msg = "Service unavailable. Please try again.";
-					}
-				);
-				
-				
-			};
-		});
-	</script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="w3.css">
+	<script src="angular_1.7.5.min.js"></script>
+	<script src="sqlweb.js"></script>
 </head>
-<body>
-	<div ng-app="myApp" ng-controller="formCtrl">
-		<h1>Welcome to SQL Web</h1>
-		<form name="formInput">
-			<fieldset>
-				<legend>Input</legend>
-				<table>
-					<tr>
-						<th align="right">Datasource:</th>
-						<td><select name="dataSource" ng-model="dataSource">
-							<option value="">Select</option>
-							<option ng-repeat="x in dsData">{{ x }}</option>
-							</select></td>
-					</tr>
-					<tr>
-						<th align="right">Query:</th>
-						<td><textarea name="queryString" cols="15" rows="4" ng-model="queryString">{{queryString}}</textarea></td>
-					</tr>
-					<tr>
-						<th>&nbsp;</th>
-						<td><button ng-click="getResult();">Execute</button></td>
-					</tr>
-				</table>
-			</fieldset>
-		</form>
-		<div name="result" id="result"></div>
+<body ng-app="myApp" ng-controller="formCtrl" class="w3-tiny" onresize="resetContainers()">
+	
+	<!-- Top container -->
+	<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+	  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"> Menu</button>
+	  <span class="w3-bar-item w3-right">SQL Web</span>
 	</div>
+	
+	<nav class="w3-sidebar w3-collapse w3-light-grey w3-border-right w3-animate-left" style="z-index:3;width:300px;" id="mySidebar">
+		<form name="dsForm">
+		<div class="w3-bar">
+			<div class="w3-bar-item">
+				<label><b>Datasource:</b></label>&nbsp;<select 
+					name="dataSource" ng-model="dataSource" ng-change="getMetaData();" required>
+					<option value="">Select...</option>
+					<option ng-repeat="x in dsData">{{ x }}</option>
+				</select>&nbsp;<span 
+					style="color:red" ng-show="dsForm.dataSource.$dirty && dsForm.dataSource.$invalid">Datasource is required.</span>
+			</div>
+		</div>
+		<div class="w3-container w3-block w3-border-top" ng-repeat="(cat, catData) in dsMetaData">
+			<button class="w3-button w3-block w3-left-align" onclick="myFunction(this)">Catalog({{cat}})</button><div id="Cat_{{cat}}" class="w3-container w3-hide w3-show">
+				<div class="w3-container w3-block" ng-repeat="(schema, schemaData) in catData">
+					<button class="w3-button w3-block w3-left-align" onclick="myFunction(this)">Schema({{schema}})</button><div id="Cat_{{cat}}_Schema_{{schema}}" class="w3-container w3-hide">
+						<div class="w3-container w3-block" ng-repeat="(tabType, tabTypeData) in schemaData.schemaObjects">
+							<button class="w3-button w3-block w3-left-align" onclick="myFunction(this)">{{tabType}}</button><div id="Cat_{{cat}}_Schema_{{schema}}_TabType_{{tabType}}" class="w3-container w3-hide">
+								<a href="#" class="w3-bar-item w3-button" ng-repeat="tabName in tabTypeData">{{tabName}}</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		</form>
+	</nav>
+	
+	<!-- Overlay effect when opening sidebar on small screens -->
+	<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+	<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+	<form name="queryForm">
+		<div class="w3-container">
+			<div class="w3-bar w3-grey w3-border-top w3-border-left w3-border-right">
+				<button class="w3-bar-item w3-button tablink w3-light-grey" onclick="openTab(event, 'Query')">Query</button>
+				<button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'History')">History</button>
+			</div>
+			<div id="Query" class="tabPanel" style="height: 200px; overflow: auto;">
+				<div style="height: 2px"></div>
+				<div class="w3-bar w3-light-grey w3-border">
+					<!-- 
+					<div class="w3-bar-item">
+						<label class="w3-bold">Datasource:</label>&nbsp;<select 
+							name="dataSource" ng-model="dataSource" ng-change="getMetaData();" required>
+							<option value="">Select...</option>
+							<option ng-repeat="x in dsData">{{ x }}</option>
+						</select>&nbsp;<span 
+							style="color:red" ng-show="queryForm.dataSource.$dirty && queryForm.dataSource.$invalid">Datasource is required.</span>
+					</div>
+					 -->
+					<button ng-click="getResult();" ng-disabled="(dsForm.dataSource.$pristine || dsForm.dataSource.$dirty && dsForm.dataSource.$invalid) || (queryForm.queryString.$pristine || queryForm.queryString.$dirty && queryForm.queryString.$invalid)"
+						class="w3-button">&#9658;&nbsp;Run</button>	
+				</div>
+				<div class="w3-light-grey w3-border-left w3-border-right w3-border-bottom">
+					<textarea name="queryString" style="width: 100%; height:146px; resize: none;" ng-model="queryString" required>{{queryString}}</textarea>
+					&nbsp;<span style="color:red" ng-show="queryForm.queryString.$dirty && queryForm.queryString.$invalid">Query is required.</span>
+				</div>
+			</div>
+			<div id="History" class="tabPanel" style="display:none;">
+				<div style="height: 2px"></div>
+				<div class="w3-responsive" style="height: 198px;">
+					<table class="w3-table-all w3-hoverable">
+						<thead>
+						<tr class='w3-light-grey'>
+							<th>S.No.</th><th>Status</th><th>Elapsed Time (ms)</th><th>No of Rows</th><th>Datasource</th><th>Query</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr ng-repeat="row in history track by $index" ng-dblclick="getHistResult($index)">
+							<td>{{$index+1}}</td><td>{{row.status}}</td><td>{{row.elapsedTime}}</td><td>{{row.rowsEffected}}</td><td>{{row.dataSource}}</td><td>{{row.queryString}}</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</form>
+	<br/>
+	<div name="result" class="w3-container"  id="result">
+		<span style="color:red" ng-show="output_msg">{{ output_msg }}</span>
+		<div ng-show="rsData">
+			<div class="w3-bar w3-grey w3-border-top w3-border-left w3-border-right">
+				<button class="w3-bar-item w3-button rstablink w3-light-grey" onclick="openResultTab(event, 'Summary')">Summary</button>
+				<button class="w3-bar-item w3-button rstablink" onclick="openResultTab(event, 'Result')">Result</button>
+				<button class="w3-bar-item w3-button rstablink" onclick="openResultTab(event, 'Metadata')">Metadata</button>
+			</div>
+			<div id="Summary" class="rstabPanel">
+				<div style="height: 2px"></div>
+				<table class="w3-table-all">
+					<tr><td style="width: 10%">DataSource:</td><td>{{rsData.dataSource}}</td></tr>
+					<tr><td>Query:</td><td>{{rsData.queryString}}</td></tr>
+					<tr><td>Status:</td><td>{{rsData.statusCode}}, {{rsData.statusDescription}}</td></tr>
+					<tr><td>No of rows:</td><td>{{rsData.resultCount}}</td></tr>
+				</table>
+			</div>
+			<div id="Result" class="rstabPanel" style="display:none">
+				<div style="height: 2px"></div>
+				<div class="w3-responsive" style="height: 300px;">
+					<table class="w3-table-all">
+						<thead>
+						<tr class='w3-light-grey'>
+							<th ng-repeat="col in rsData.resultMetaData">{{col.columnLabel}}</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr ng-repeat="row in rsData.result">
+							<td ng-repeat="val in row track by $index">{{ val }}</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="Metadata" class="rstabPanel" style="display:none">
+				<div style="height: 2px"></div>
+				<div class="w3-responsive" style="height: 300px;">
+					<table class="w3-table-all">
+						<thead>
+						<tr class='w3-light-grey'>
+							<th>S.No.</th>
+							<th>Column Name</th>
+							<th>Column Label</th>
+							<th>Table Name</th>
+							<th>Catalog Name</th>
+							<th>Schema Name</th>
+							<th>Column Type</th>
+							<th>Column Class</th>
+							<th>Precision</th>
+							<th>Scale</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr ng-repeat="col in rsData.resultMetaData track by $index">
+							<td>{{ $index + 1 }}</td>
+							<td>{{col.columnName}}</td>
+							<td>{{col.columnLabel}}</td>
+							<td>{{col.tableName}}</td>
+							<td>{{col.catalogName}}</td>
+							<td>{{col.schemaName}}</td>
+							<td>{{col.columnTypeName}}</td>
+							<td>{{col.columnClassName}}</td>
+							<td>{{col.precision}}</td>
+							<td>{{col.scale}}</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	
+	<script type="text/javascript">
+		
+	//Get the Sidebar
+		var mySidebar = document.getElementById("mySidebar");
+	
+		// Get the DIV with overlay effect
+		var overlayBg = document.getElementById("myOverlay");
+	
+		// Toggle between showing and hiding the sidebar, and add overlay effect
+		function w3_open() {
+		    if (mySidebar.style.display === 'block') {
+		        mySidebar.style.display = 'none';
+		        overlayBg.style.display = "none";
+		    } else {
+		        mySidebar.style.display = 'block';
+		        overlayBg.style.display = "block";
+		    }
+		}
+	
+		// Close the sidebar with the close button
+		function w3_close() {
+		    mySidebar.style.display = "none";
+		    overlayBg.style.display = "none";
+		}
+	
+	</script>
 </body>
 </html>

@@ -3,6 +3,8 @@
  */
 package com.chinthams.sqlweb;
 
+import java.util.regex.Pattern;
+
 /**
  * @author SRCHINTH
  *
@@ -20,6 +22,8 @@ public interface Constants {
 	String STDESC_INVALID_DATASOURCE = "Invalid DataSource";
 	int STCODE_INVALID_QUERY = 102;
 	String STDESC_INVALID_QUERY = "Invalid Query String";
+	
+	Pattern DML_PATTERN = Pattern.compile("^[^a-zA-Z]*?(CREATE|ALTER|DROP|INSERT|UPDATE|DELETE|EXECUTE).*$", Pattern.CASE_INSENSITIVE);
 	
 	
 }
