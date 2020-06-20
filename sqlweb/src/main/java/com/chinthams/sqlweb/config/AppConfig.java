@@ -49,8 +49,11 @@ public class AppConfig implements Constants {
 			if (propKey.startsWith(PREFIX_JDBC)) {
 				String[] keys = propKey.split(SPLIT);
 				/*
-				 * jdbc.<dsName>.driverClassName jdbc.<dsName>.url jdbc.<dsName>.username
-				 * jdbc.<dsName>.password jdbc.<dsName>.validationQuery
+				 * jdbc.<dsName>.driverClassName
+				 * jdbc.<dsName>.url
+				 * jdbc.<dsName>.username
+				 * jdbc.<dsName>.password
+				 * jdbc.<dsName>.validationQuery
 				 * jdbc.<dsName>.testOnCreate
 				 */
 				if (keys != null && keys.length == 3) {
